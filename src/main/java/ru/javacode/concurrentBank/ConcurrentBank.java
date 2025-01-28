@@ -1,5 +1,7 @@
 package ru.javacode.concurrentBank;
 
+import ru.javacode.concurrentBank.exception.InsufficientFundsException;
+
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class ConcurrentBank implements Bank {
@@ -29,6 +31,8 @@ public class ConcurrentBank implements Bank {
                     sender.deposit(amount);
                 }
             }
+        } else {
+            throw new InsufficientFundsException("Недостаточно средств");
         }
     }
 

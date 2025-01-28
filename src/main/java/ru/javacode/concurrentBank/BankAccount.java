@@ -1,7 +1,5 @@
 package ru.javacode.concurrentBank;
 
-import ru.javacode.concurrentBank.exception.InsufficientFundsException;
-
 import java.util.concurrent.atomic.AtomicLong;
 
 public class BankAccount {
@@ -17,10 +15,6 @@ public class BankAccount {
     }
 
     public long withdraw(long amount) {
-        if (account.get() < amount) {
-            throw new InsufficientFundsException("На счете недостаточно средств");
-        }
-
         return account.addAndGet(-amount);
     }
 
