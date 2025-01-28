@@ -30,7 +30,7 @@ public class BankAccount {
         return id;
     }
 
-    public long getAccount() {
+    public long getBalance() {
         return account.get();
     }
 }
