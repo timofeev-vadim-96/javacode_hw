@@ -1,4 +1,6 @@
-package ru.javacode.concurrentBank;
+package ru.javacode.concurrentBank.service;
+
+import ru.javacode.concurrentBank.model.BankAccount;
 
 /**
  * В виртуальном банке "ConcurrentBank" решено внедрить многопоточность для обработки операций по счетам клиентов.
@@ -15,8 +17,10 @@ package ru.javacode.concurrentBank;
  *
  * Реализуйте метод getTotalBalance, который возвращает общий баланс всех счетов в банке.
  */
-public interface Bank {
+public interface BankService {
     BankAccount createAccount(long amount);
+
+    void transfer(long senderId, long recipientId, long amount);
 
     void transfer(BankAccount sender, BankAccount recipient, long amount);
 
