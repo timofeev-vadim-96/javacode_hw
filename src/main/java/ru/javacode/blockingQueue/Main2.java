@@ -1,13 +1,13 @@
 package ru.javacode.blockingQueue;
 
-public class Main {
+public class Main2 {
     public static void main(String[] args) {
-        BlockingLinkedQueue<Integer> queue = new BlockingLinkedQueue<>(16);
+        BlockingLinkedQueue2<Integer> queue = new BlockingLinkedQueue2<>(16);
 
         System.out.println("начальный размер очереди = " + queue.size()); //размер = 0
 
         Thread thread1 = new Thread(() -> {
-
+            try {
                 queue.dequeue();
 
                 for (int i = 1; i <= 16; i++) {
@@ -17,7 +17,9 @@ public class Main {
                 queue.enqueue(17);
 
                 System.out.println(queue.size());
-
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
         });
 
         Thread thread2 = new Thread(() -> {

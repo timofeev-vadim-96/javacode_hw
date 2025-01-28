@@ -15,7 +15,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * Используйте механизмы wait() и notify() для координации между производителями и потребителями.
  * Реализуйте метод size(), который возвращает текущий размер очереди.
  */
-public class BlockingLinkedQueue<T> {
+public class BlockingLinkedQueue2<T> {
     private static final int DEFAULT_CAPACITY = 16;
 
     private Node<T> head;
@@ -26,51 +26,61 @@ public class BlockingLinkedQueue<T> {
 
     private final AtomicInteger size;
 
-    public BlockingLinkedQueue(int capacity) {
+    private final ReentrantLock lock;
+
+    private final Condition fullCondition;
+
+    private final Condition emtpyCondition;
+
+    public BlockingLinkedQueue2(int capacity) {
         this.capacity = capacity;
         size = new AtomicInteger(0);
+        lock = new ReentrantLock();
+        fullCondition = lock.newCondition();
+        emtpyCondition = lock.newCondition();
     }
 
-    public BlockingLinkedQueue() {
+    public BlockingLinkedQueue2() {
         this(DEFAULT_CAPACITY);
     }
 
-    public synchronized void enqueue(T value) {
-        while (size.get() == capacity) {
-            try {
-                wait();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
+    public void enqueue(T value) throws InterruptedException {
+        try {
+            lock.lock();
+            while (size.get() == capacity) {
+                fullCondition.await();
             }
+            if (head == null) {
+                head = new Node<>(value);
+                tail = head;
+            } else {
+                tail.next = new Node<>(value);
+                tail = tail.next;
+            }
+            size.incrementAndGet();
+            emtpyCondition.signalAll();
+        } finally {
+            lock.unlock();
         }
-        if (head == null) {
-            head = new Node<>(value);
-            tail = head;
-        } else {
-            tail.next = new Node<>(value);
-            tail = tail.next;
-        }
-        size.incrementAndGet();
-
-        notifyAll();
     }
 
-    public synchronized T dequeue() {
-        while (size.get() == 0) {
-            try {
-                wait();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
+    public T dequeue() throws InterruptedException {
+        try {
+            lock.lock();
+            while (size.get() == 0) {
+                emtpyCondition.await();
             }
+
+            T value = head.value;
+            head = head.next;
+
+            size.decrementAndGet();
+
+            fullCondition.signalAll();
+            return value;
+        } finally {
+            lock.unlock();
         }
-
-        T value = head.value;
-        head = head.next;
-
-        size.decrementAndGet();
-
-        notifyAll();
-        return value;
     }
 
     public int size() {
